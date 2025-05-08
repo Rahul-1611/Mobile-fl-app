@@ -88,8 +88,8 @@ BATTERY_MIN = 30  # %
 CPU_MAX = 50  # %
 
 # ---------- training length control ----------
-TARGET_MINUTES = 3  # ≈ desired run time
-EPOCHS_PER_LOOP = 600  # adjust if you need longer / shorter
+TARGET_MINUTES = 3
+EPOCHS_PER_LOOP = 600
 
 
 # ---------- UI ----------
@@ -131,7 +131,7 @@ class Main(BoxLayout):
     def train_one_round(self):
         start = time.perf_counter()
         acc = 0.0
-        # logistic-regression toy – loop long enough to hit 5 minutes
+
         while time.perf_counter() - start < TARGET_MINUTES * 60:
             N = 200
             X = [[random.random(), random.random()] for _ in range(N)]
@@ -147,7 +147,6 @@ class Main(BoxLayout):
                     w2 -= lr * g * x2
             acc = sum(((w1 * x1 + w2 * x2) > 0) == t for (x1, x2), t in zip(X, y)) / N
 
-            # progress ping every minute
             elapsed = int((time.perf_counter() - start) / 60)
             if elapsed and elapsed % 1 == 0:  # every full minute
                 live_cpu = proc_cpu_percent()
@@ -157,13 +156,12 @@ class Main(BoxLayout):
                 msg = f"Training… {elapsed} min elapsed\n" f"CPU now ≈ {live_cpu}%"
                 Clock.schedule_once(lambda dt, m=msg: setattr(self.lbl, "text", m), 0)
 
-        # done
         Clock.schedule_once(lambda dt, a=acc: self.show_result(a), 0)
 
     def show_result(self, acc):
         batt = get_battery_level()
         cpu = proc_cpu_percent()
-        # save them on the object BEFORE the send
+
         self.acc = acc
         self.battery = batt
         self.cpu = cpu
